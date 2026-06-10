@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard Financeiro — Front CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--blue:#3B82F6;--red:#EF5A6F;--green:#2FB67C;--purple:#9B5DE5;--amber:#E0A23C;--data:#7B7896;--bg:#0f0e16;--bg2:#16131f;--card:#1c1a28;--card2:#262234;--line:rgba(255,255,255,.08);--tx:#F1F0F6;--mut:#9d99b2;--mut2:#6b6883;}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Raleway',sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;}
+.app{display:flex;min-height:100vh;}
+.side{width:236px;background:var(--bg2);border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+.side .logo{padding:6px 8px 24px;}
+.navgrp{font-size:10px;font-weight:800;color:var(--mut2);text-transform:uppercase;letter-spacing:.08em;padding:16px 13px 6px;}
+.navi{display:flex;flex-direction:column;gap:3px;}
+.navi button{display:flex;align-items:center;gap:11px;padding:11px 13px;border:none;background:none;color:var(--mut);font-family:inherit;font-size:14px;font-weight:600;border-radius:11px;cursor:pointer;text-align:left;width:100%;transition:.15s;}
+.navi button i{font-size:19px;} .navi button:hover{background:rgba(255,255,255,.04);color:var(--tx);}
+.navi button.active{background:linear-gradient(90deg,rgba(59,130,246,.18),rgba(155,93,229,.14));color:#fff;} .navi button.active i{color:var(--blue);}
+.side .foot{margin-top:auto;font-size:11px;color:var(--mut2);padding:8px;line-height:1.7;} .side .foot b{color:var(--mut);font-weight:600;}
+main{flex:1;min-width:0;}
+.phead{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:26px 32px 4px;}
+.phead h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.3px;}
+.phead .sub1{font-size:12.5px;color:var(--mut);margin-top:3px;font-weight:500;}
+.pctl{display:flex;align-items:center;gap:8px;}
+.pctl .lab{font-size:10.5px;font-weight:800;color:var(--mut2);text-transform:uppercase;letter-spacing:.05em;}
+.pctl select{background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:8px 11px;color:var(--tx);font-family:inherit;font-size:13px;font-weight:700;outline:none;cursor:pointer;}
+.pctl button{background:none;border:1px solid var(--line);color:var(--mut);border-radius:9px;padding:8px 11px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;}
+.pctl button:hover{color:var(--tx);border-color:var(--mut2);}
+.keybar{display:flex;gap:20px;flex-wrap:wrap;align-items:center;padding:14px 32px 0;font-size:12px;font-weight:700;color:var(--mut);}
+.keybar .k{display:flex;align-items:center;gap:7px;} .keybar .kd{width:13px;height:13px;border-radius:4px;}
+.content{padding:16px 32px 56px;}
+.view{display:none;} .view.active{display:block;animation:f .25s ease;}
+@keyframes f{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:15px;margin-bottom:18px;}
+.kpi{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--line);border-radius:14px;padding:16px 19px;}
+.kpi.b-green{border-top-color:var(--green);} .kpi.b-red{border-top-color:var(--red);} .kpi.b-blue{border-top-color:var(--blue);} .kpi.b-amber{border-top-color:var(--amber);} .kpi.b-purple{border-top-color:var(--purple);}
+.kpi .lbl{font-size:11px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.kpi .val{font-size:28px;font-weight:800;margin-top:5px;letter-spacing:-.5px;}
+.kpi.b-green .val{color:var(--green);} .kpi.b-red .val{color:var(--red);} .kpi.b-blue .val{color:#7fb0ff;} .kpi.b-amber .val{color:var(--amber);} .kpi.b-purple .val{color:#b98bf0;}
+.kpi .sub{font-size:12.5px;margin-top:6px;color:var(--mut);font-weight:600;}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:16px;}
+.panel h3{margin:0;font-size:15.5px;font-weight:700;} .panel .cap{font-size:12.5px;color:var(--mut);margin:4px 0 16px;font-weight:500;line-height:1.5;}
+.panel .cap b{color:var(--tx);font-weight:700;}
+.etab{width:100%;border-collapse:collapse;font-size:13px;}
+.etab th{text-align:left;font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--line);font-weight:700;}
+.etab td{padding:9px 10px;border-bottom:1px solid var(--line);}
+.etab tbody tr:hover{background:rgba(255,255,255,.025);}
+.chartbox{position:relative;height:280px;}
+.statrow{display:flex;align-items:center;gap:14px;background:rgba(47,182,124,.09);border:1px solid rgba(47,182,124,.24);border-radius:15px;padding:15px 19px;margin-bottom:16px;}
+.statrow .big{width:44px;height:44px;border-radius:12px;background:rgba(47,182,124,.16);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:24px;}
+.statrow .t1{font-size:14.5px;font-weight:700;} .statrow .t2{font-size:12.5px;color:var(--mut);font-weight:500;}
+.srclist{display:flex;flex-direction:column;gap:13px;} .srcrow{display:grid;grid-template-columns:1.4fr 2fr auto;gap:14px;align-items:center;}
+.srcrow .nm{font-size:13.5px;font-weight:600;}
+.srcrow .bar{height:8px;border-radius:5px;background:rgba(255,255,255,.06);overflow:hidden;} .srcrow .bar i{display:block;height:100%;border-radius:5px;}
+.srcrow .vl{font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;min-width:96px;}
+.al{display:flex;gap:11px;align-items:flex-start;border-radius:12px;padding:13px 16px;font-size:13px;color:var(--tx);line-height:1.55;} .al i{font-size:19px;margin-top:1px;flex:none;}
+.al.ok{background:rgba(47,182,124,.09);border:1px solid rgba(47,182,124,.22);} .al.ok i{color:var(--green);}
+.al.warn{background:rgba(224,162,60,.09);border:1px solid rgba(224,162,60,.22);} .al.warn i{color:var(--amber);}
+.al.bad{background:rgba(239,90,111,.09);border:1px solid rgba(239,90,111,.22);} .al.bad i{color:var(--red);}
+.alts{display:flex;flex-direction:column;gap:10px;}
+.compbar{display:flex;height:46px;border-radius:11px;overflow:hidden;margin-bottom:16px;}
+.compbar div{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;border-right:2px solid var(--card);}
+.compleg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+.compleg .it{display:flex;gap:10px;align-items:flex-start;} .compleg .sw{width:14px;height:14px;border-radius:4px;margin-top:2px;flex:none;}
+.dre{width:100%;border-collapse:collapse;font-size:13.5px;}
+.dre td{padding:10px 12px;border-bottom:1px solid var(--line);}
+.dre td:last-child{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;}
+.dre tr.h td{font-weight:800;font-size:14px;background:rgba(255,255,255,.03);}
+.dre tr.tot td{border-top:2px solid var(--line);border-bottom:none;font-weight:800;font-size:15px;}
+.dre tr.sub td:first-child{padding-left:24px;color:var(--mut);font-weight:500;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+@media(max-width:880px){.app{flex-direction:column;} .side{width:auto;height:auto;position:static;flex-direction:row;align-items:center;gap:6px;overflow-x:auto;padding:12px;} .side .logo,.navgrp{display:none;} .navi{flex-direction:row;} .navi button span{display:none;} .phead,.content,.keybar{padding-left:16px;padding-right:16px;}}
+</style>
+</head>
+<body>
+<div id="gate" style="position:fixed;inset:0;z-index:9999;background:#100e18;display:flex;align-items:center;justify-content:center;font-family:'Raleway',sans-serif;">
+<div style="text-align:center;max-width:340px;width:90%;padding:24px;">
+<svg width="210" height="48" viewBox="0 0 150 34" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:6px">
+<defs><linearGradient id="fgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E7BFF"/><stop offset=".55" stop-color="#8A3FFB"/><stop offset="1" stop-color="#E81CC4"/></linearGradient></defs>
+<g fill="none" stroke="url(#fgg)" stroke-width="4.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16 l5.5 5.5 l8 -12.5"/><path d="M13.5 16 l5.5 5.5 l9 -14.5"/></g>
+<text x="33" y="25" font-family="Raleway,sans-serif" font-weight="800" font-size="22" fill="#fff" letter-spacing="-.5">Front</text>
+<text x="116" y="29" font-family="Raleway,sans-serif" font-weight="700" font-size="8.5" fill="#9893ad" letter-spacing="1">CRM</text>
+</svg>
+<div style="color:#F1F0F6;font-size:17px;font-weight:700;margin:18px 0 3px;">Acesso restrito</div>
+<div style="color:#9d99b2;font-size:12.5px;font-weight:500;margin-bottom:22px;">Dashboard financeiro · Front CRM</div>
+<div style="position:relative;"><input id="pw" type="password" placeholder="Senha" autocomplete="off" style="width:100%;padding:12px 42px 12px 14px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:#1c1a28;color:#fff;font-family:Raleway,sans-serif;font-size:14px;outline:none;"><i id="peye" class="ti ti-eye" title="Mostrar senha" style="position:absolute;right:13px;top:50%;transform:translateY(-50%);color:#9d99b2;font-size:18px;cursor:pointer;"></i></div>
+<div id="gerr" style="color:#EF5A6F;font-size:12px;font-weight:600;margin-top:8px;height:14px;"></div>
+<button id="gbtn" style="width:100%;margin-top:8px;padding:12px;border:none;border-radius:11px;background:linear-gradient(90deg,#2E7BFF,#8A3FFB);color:#fff;font-family:Raleway,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">Entrar</button>
+</div></div>
+<script>(function(){var PWH=4014400730;function dj(s){var H=5381;for(var i=0;i<s.length;i++)H=((H<<5)+H+s.charCodeAt(i))>>>0;return H;}function ok(){var g=document.getElementById("gate");if(g)g.style.display="none";try{sessionStorage.setItem("front_ok","1");}catch(e){}}function go(){var v=document.getElementById("pw").value;if(dj(v)===PWH)ok();else document.getElementById("gerr").textContent="Senha incorreta";}var pe=document.getElementById("peye");if(pe)pe.onclick=function(){var p=document.getElementById("pw");var sh=p.type==="password";p.type=sh?"text":"password";pe.className=sh?"ti ti-eye-off":"ti ti-eye";};var authed=false;try{authed=sessionStorage.getItem("front_ok")==="1";}catch(e){}if(authed){ok();}else{document.getElementById("gbtn").onclick=go;document.getElementById("pw").addEventListener("keydown",function(e){if(e.key==="Enter")go();});setTimeout(function(){var p=document.getElementById("pw");if(p)p.focus();},100);}})();</script>
+<div class="app">
+<aside class="side">
+<div class="logo">
+<svg width="148" height="34" viewBox="0 0 150 34" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="fg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E7BFF"/><stop offset=".55" stop-color="#8A3FFB"/><stop offset="1" stop-color="#E81CC4"/></linearGradient></defs>
+<g fill="none" stroke="url(#fg)" stroke-width="4.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16 l5.5 5.5 l8 -12.5"/><path d="M13.5 16 l5.5 5.5 l9 -14.5"/></g>
+<text x="33" y="25" font-family="Raleway,sans-serif" font-weight="800" font-size="22" fill="#fff" letter-spacing="-.5">Front</text>
+<text x="116" y="29" font-family="Raleway,sans-serif" font-weight="700" font-size="8.5" fill="#9893ad" letter-spacing="1">CRM</text>
+</svg>
+</div>
+<div class="navi">
+<div class="navgrp">Executivo</div>
+<button class="active" data-v="resumo"><i class="ti ti-sparkles"></i><span>Resumo CEO</span></button>
+<button data-v="dre"><i class="ti ti-report-money"></i><span>DRE · Custos · Folha</span></button>
+<div class="navgrp">Operacional</div>
+<button data-v="caixa"><i class="ti ti-wave-square"></i><span>Caixa &amp; Cobrança</span></button>
+<button data-v="contratos"><i class="ti ti-file-invoice"></i><span>Contratos &amp; Clientes</span></button>
+</div>
+<div class="foot"><b>Front CRM</b> · Grupo Vendas Pro<br>Fonte: Conta Azul · ASAAS · contratos<br><span style="color:var(--mut2)">dados exatos · jan–mai/2026</span></div>
+</aside>
+<main>
+<div class="phead">
+<div><h1 id="ttl">Resumo CEO</h1><div class="sub1" id="sub1">visão executiva — o que entra, o que sobra e para onde vai</div></div>
+<div class="pctl"><span class="lab">Período</span><select id="f_de"></select><span style="color:var(--mut2)">→</span><select id="f_ate"></select><button id="f_reset">tudo</button></div>
+</div>
+<div class="keybar" id="keybar"></div>
+<div class="content">
+
+<!-- ===== RESUMO CEO ===== -->
+<section class="view active" id="resumo">
+<div class="kpis">
+<div class="kpi b-blue"><div class="lbl">Receita recebida</div><div class="val" id="k_rec">—</div><div class="sub" id="k_recs"></div></div>
+<div class="kpi b-green"><div class="lbl">Lucro operacional</div><div class="val" id="k_ro">—</div><div class="sub" id="k_ros"></div></div>
+<div class="kpi b-purple"><div class="lbl">Resultado de caixa</div><div class="val" id="k_cx">—</div><div class="sub" id="k_cxs"></div></div>
+<div class="kpi"><div class="lbl">Caixa atual</div><div class="val" id="k_sd">—</div><div class="sub">Inter + ASAAS · 31/mai</div></div>
+</div>
+<div class="alts" id="alerts" style="margin-bottom:18px;"></div>
+<div class="panel"><h3>Do lucro operacional ao caixa</h3><div class="cap">por que a operação dá lucro mas o caixa pode fechar negativo — as saídas <b>abaixo da linha</b> (que não são da operação)</div><div id="ponte" style="display:flex;align-items:stretch;gap:8px;flex-wrap:wrap"></div></div>
+<div class="panel"><h3>Para onde vai cada R$ 1 de receita</h3><div class="cap">divisão da receita entre custos da operação, distribuição de lucros e a compra da parte do sócio (compra do Guilherme — termina jun/26)</div><div class="compbar" id="compbar"></div><div class="compleg" id="compleg"></div></div>
+<div class="panel"><h3>Receita × Lucro operacional, mês a mês</h3><div class="cap"><b>azul</b> = receita recebida · <b>verde/vermelho</b> = lucro operacional do mês</div><div class="chartbox"><canvas id="r_mes"></canvas></div></div>
+</section>
+
+<!-- ===== DRE / CUSTOS / FOLHA ===== -->
+<section class="view" id="dre">
+<div class="grid2">
+<div class="panel"><h3>DRE gerencial</h3><div class="cap" id="dre_cap">regime de caixa · Conta Azul</div><table class="dre" id="dre_tbl"></table></div>
+<div class="panel"><h3>Para onde foi o dinheiro</h3><div class="cap"><b style="color:var(--red)">vermelho</b> = infra (maior custo) · <b style="color:var(--purple)">roxo</b> = distribuição + compra de cota · cinza = demais</div><div class="chartbox" style="height:380px"><canvas id="cu_cat"></canvas></div></div>
+</div>
+<div class="panel"><h3>Folha de pagamento — pico em junho</h3><div class="cap">subiu até R$41 mil por ter <b>2 CTOs ao mesmo tempo</b>. Valdomiro rescindiu — <b>junho foi o último pagamento</b>, fica só Gustavo (CTO). A folha deve <b>recuar ~R$13 mil/mês a partir de julho</b> — a <b style="color:var(--amber)">barra âmbar</b> é julho projetado (~R$27,5 mil, sem o Valdomiro) · fonte: Prestadores de Serviço</div>
+<div class="grid2" style="margin-bottom:4px"><div class="chartbox" style="height:240px"><canvas id="eq_mes"></canvas></div>
+<table class="etab" style="font-size:12px"><thead><tr><th>Pessoa</th><th style="text-align:right">Jan</th><th style="text-align:right">Fev</th><th style="text-align:right">Mar</th><th style="text-align:right">Abr</th><th style="text-align:right">Mai</th><th style="text-align:right">Jun</th></tr></thead><tbody id="eq_tbl"></tbody></table></div></div>
+</section>
+
+<!-- ===== CAIXA & COBRANÇA ===== -->
+<section class="view" id="caixa">
+<div class="kpis">
+<div class="kpi b-blue"><div class="lbl">Caixa atual</div><div class="val" id="cx_now">—</div><div class="sub">Inter R$89k + ASAAS R$6k</div></div>
+<div class="kpi b-green"><div class="lbl">Recebido no período</div><div class="val" id="cx_rec">—</div><div class="sub">entradas via ASAAS</div></div>
+<div class="kpi b-red"><div class="lbl">Pago no período</div><div class="val" id="cx_pag">—</div><div class="sub">todas as saídas</div></div>
+<div class="kpi b-amber"><div class="lbl">Inadimplência</div><div class="val" id="cx_inad">—</div><div class="sub" id="cx_inads"></div></div>
+</div>
+<div class="alts" style="margin-bottom:16px"><div class="al warn"><i class="ti ti-clock-pause"></i><div><b>Trava do cartão (32 dias):</b> só o cartão demora a liberar — hoje há <b>R$ 27,6 mil a liberar</b>. Boleto cai em 1 dia e Pix na hora, e <b>só 17% da receita é cartão</b> (boleto 51%, Pix 32%), então a trava é pequena.</div></div></div>
+<div class="grid2">
+<div class="panel"><h3>Entrou × Saiu, mês a mês</h3><div class="cap"><b style="color:var(--green)">verde</b> = recebido · <b style="color:var(--red)">vermelho</b> = pago</div><div class="chartbox"><canvas id="cx_bank"></canvas></div></div>
+<div class="panel"><h3>Sobra de caixa por mês</h3><div class="cap">recebido − pago (já inclui distribuição e compra de cota)</div><div class="chartbox"><canvas id="cx_net"></canvas></div></div>
+</div>
+<div class="panel"><h3>Inadimplência — quem está com pagamento vencido</h3><div class="cap">régua de cobrança · fonte: Conta Azul · <b id="inad_sum"></b></div>
+<table class="etab"><thead><tr><th>Cliente</th><th style="text-align:right">Vencido</th><th style="text-align:right">A vencer</th></tr></thead><tbody id="inad_tbl"></tbody></table></div>
+</section>
+
+<!-- ===== CONTRATOS & CLIENTES ===== -->
+<section class="view" id="contratos">
+<div class="kpis">
+<div class="kpi b-blue"><div class="lbl">MRR contratado</div><div class="val" id="cb_mrr">—</div><div class="sub" id="cb_mrrs"></div></div>
+<div class="kpi b-green"><div class="lbl">Contratos ativos</div><div class="val" id="cb_ativos">—</div><div class="sub" id="cb_ativoss"></div></div>
+<div class="kpi b-red"><div class="lbl">Churn acumulado</div><div class="val" id="cb_churn">—</div><div class="sub" id="cb_churns"></div></div>
+<div class="kpi"><div class="lbl">Clientes únicos</div><div class="val">657</div><div class="sub">no período (jan–mai)</div></div>
+</div>
+<div class="alts" style="margin-bottom:16px"><div class="al bad"><i class="ti ti-alert-triangle"></i><div><b>Churn acelerando:</b> março/26 teve <b>6 distratos</b>, o maior da série. Entender o motivo (preço, uso, suporte) antes de virar tendência é a prioridade da operação.</div></div></div>
+<div class="grid2">
+<div class="panel"><h3>Entraram × Saíram contratos, mês a mês</h3><div class="cap"><b style="color:var(--green)">verde</b> = novos contratos · <b style="color:var(--red)">vermelho</b> = distratos</div><div class="chartbox"><canvas id="cb_flow"></canvas></div></div>
+<div class="panel"><h3>Base ativa por tipo de plano</h3><div class="cap">quantos contratos ativos em cada modalidade</div><div class="chartbox"><canvas id="cb_mix"></canvas></div></div>
+</div>
+<div class="grid2">
+<div class="panel"><h3>Receita por tipo de cobrança</h3><div class="cap">quase metade vem <b>além da mensalidade</b> — os <b style="color:var(--amber)">contatos excedentes</b> sozinhos são ~19% (e dependem do uso de WhatsApp)</div><div class="chartbox"><canvas id="rv_tier"></canvas></div></div>
+<div class="panel"><h3>Top 12 clientes por receita</h3><div class="cap">período todo · jan–mai/2026</div>
+<table class="etab"><thead><tr><th>Cliente</th><th style="text-align:right">Receita</th><th style="text-align:right">% do total</th></tr></thead><tbody id="cl_tbl"></tbody></table></div>
+</div>
+</section>
+
+</div>
+</main>
+</div>
+<script>
+const MN5=['Jan','Fev','Mar','Abr','Mai'];
+const D={
+ rec_m:[137858.75,151238.59,155575.68,147510.00,136483.96],
+ pag_m:[140380.84,171551.95,154168.73,144231.01,148485.01],
+ assin_n:[160,159,178,168,162],
+ tier_lab:['Entrada (<R$100)','R$100–300','R$300–800','R$800–1.300','Premium (R$1.300+)'],
+ TIER_M:[[2052.19,1337.62,1916.5,1432.59,1646.33],[4189.34,5192.04,5911.64,6555.36,5394.97],[16321.64,21143.16,18307.79,17092.68,18707.85],[33705.94,36037.26,42705.69,47309.86,39137.79],[81589.64,83797.81,86734.06,75119.51,71597.02]],
+ TIPO_M:{"Mensalidade":[77041.09,80608.65,79000.66,70353.86,53240.76],"Contatos excedentes":[18793.17,32104.3,30329.2,24736.38,25972.6],"Canais adicionais":[4980.6,8130.5,9625.3,9806.5,9879.9],"Usuários adicionais":[4647.06,4207.06,3608.26,3608.26,2411.16],"Agentes de IA":[3988.0,3988.0,5979.0,4485.0,4982.0],"Setup":[2394.0,7285.0,4091.0,5588.0,0.0],"Outros":[21958.54,15452.0,21687.31,19573.66,10466.8]},
+ PAGM:{"Servidor / hospedagem (infra)":[41597.36,50899.2,50021.56,47306.29,47985.68],"Distribuição de lucros":[35000,45000,25000,20000,20000],"Aquisição societária":[20000,20000,20000,20000,20000],"Simples Nacional (DAS)":[16638.77,22358.89,20312.85,21585.76,18877.57],"Time de tecnologia":[11500,11500,11500,19000,24700],"Marketing":[8790.32,9500,9500,7500,9500],"Adm (terceirizado)":[3057,3057,3057,3057,557],"Softwares e assinaturas":[1081.95,1400.78,1825.71,1765.78,4809.14],"Consultores":[0,2741.93,7500,0,0],"Taxas ASAAS":[1696.14,1694.39,1793.36,1847.78,1130.01],"Comissão de parceiros":[689.19,689.19,913.68,614.34,353.53],"Devoluções":[0,2381.74,239.1,0,0],"Viagens":[0,0,2020.78,0,0],"A identificar":[0,0,0,1320,0],"Encargos":[166.98,178.31,332.63,178.31,183.01],"Aluguel":[99.99,99.99,99.99,0,99.99],"Taxas bancárias":[51.01,50.53,52.07,55.75,54.08],"Alimentação":[0,0,0,0,235],"Mídia paga":[12.13,0,0,0,0]},
+ top_clientes:[["ASSAAD EDUCAÇÃO LTDA",16205.35],["Editora e Livraria Conhecimento Libertas",8192.28],["UNIVERSO NARRADO EDUCAÇÃO LTDA",6692.04],["Finanfast Securitizadora AS",6681.70],["Veda Saúde LTDA",6373.16],["Finanfast Securitizadora SA",5184.70],["VK DIGITAL LTDA",4913.53],["SCS Digital LTDA",4830.81],["Caion Treino e Cond. Físico LTDA",4200.00],["Seda College Online",3976.00],["Transformar Desenv. Emocional LTDA",3782.00],["Majo Digital LTDA",3491.00]],
+ rec_tot_full:728666.98,
+ caixa_atual:95151.98,
+ DEDU:["Taxas ASAAS","Taxas bancárias","Simples Nacional (DAS)","Encargos","Devoluções"],
+ SM:["Marketing","Comissão de parceiros","Mídia paga"],
+ INFRA:"Servidor / hospedagem (infra)", TEC:"Time de tecnologia",
+ DIST:"Distribuição de lucros", AQUIS:"Aquisição societária"
+};
+const COB={mrr_ativos:105327,mrr_mensal:66297,mrr_anual:37608,n_ativos:128,mensal_ativos:60,anual_ativos:36,poc_ativos:32,n_distrato:36,churn_pct:0.22,inad_total:44650.95,inad_n:22,avencer_total:446602.30,
+ dist_labels:["2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05"],
+ dist_counts:[2,1,0,0,2,3,6,0,0], new_counts:[10,7,4,3,13,9,6,3,2],
+ inad_list:[["Sarah Brandão de Oliveira Santos LTDA",7135.7,0],["Xo Rugas",6449.15,1996.0],["Lais de Oliveira Cursos e Treinamentos",5988.0,0],["DGL Nutrição e Saúde",3810.73,0],["FP Treinamento e Capacitação Digital LTDA",3590.48,99.8],["APRENDA APERFEIÇOAMENTO E QUALIFICAÇÃO LTDA",3213.6,1606.8],["Morellos Academia LTDA",2994.0,2994.0],["Seda College Online Escola de Idiomas",2485.0,0],["Majo Digital LTDA",1994.0,0],["APP Minha Casa LTDA",1500.0,2997.0],["LSMC Cursos / LS Educação",1497.0,2644.7],["Editora Conhecimento Liberta Ltda",1196.2,2392.4],["AMÉRIK MARKETING LTDA",993.0,993.0],["Lincoln Almeida Saude e Fitness LTDA",746.5,1542.9],["GEC Empreendimentos Cosméticos LTDA",349.3,698.6]]};
+const FOLHA_M=[24206.70,26948.63,29206.70,29631.85,34757.00,40757.00];
+const FOLHA=[["Valdomiro (CTO — saiu jun)",[null,null,null,0,13200,13200]],["Gustavo (CTO)",[null,null,null,null,null,6000]],["Paula",[6500,6500,6500,6500,6500,6500]],["Brenno (Coord. MKT)",[5000,5000,5000,5000,5000,5000]],["Jader",[5000,5000,5000,12500,5000,5000]],["Leonardo (Tráfego)",[2500,2500,2500,2500,2500,2500]],["Rodrigo (Sales Ops)",[null,2741.93,5000,null,null,null]],["Flávio (CS)",[2500,2500,2500,2500,null,null]],["Rafael (Designer)",[2000,2000,2000,null,null,null]],["Thaís",[null,null,null,null,2000,2000]],["Ana Rosa",[557,557,557,557,557,557]],["Eduardo (Parceiro)",[74.85,74.85,74.85,74.85,null,null]],["Caíque (Parceiro)",[74.85,74.85,74.85,null,null,null]]];
+const RENOV=[["Assaad Treinamentos LTDA","14/05/25",-392,1247.5],["Transformar Desenvolvimento Emocional","29/05/25",-377,1247.5],["Panthers Treinamento em Desenvolv.","08/07/25",-337,1497.0],["Danilo Oliveira Advogados","26/08/25",-288,497.0],["Záfira Atacado LTDA","09/09/25",-274,1497.0],["Comunicadores Magnéticos LTDA","12/09/25",-271,1422.0],["The Invisible Company LTDA","14/10/25",-239,1497.0],["Inspiração Treinamentos LTDA","15/10/25",-238,1497.0],["LSMC Cursos e Treinamentos S.A.","24/10/25",-229,1497.0],["Veda Saúde LTDA","02/11/25",-220,1288.0],["Vinicius F. Rodrigues de Oliveira","11/11/25",-211,1497.0],["SCS Digital LTDA","14/12/25",-178,1497.0],["Agência Shoot Treinamento","28/02/26",-102,1297.0],["Xo Rugas","12/03/26",-90,1497.0],["Rocha Cursos e Treinamentos (Sex. Sem Segr.)","10/05/26",-31,1497.0],["Tradecorp Importadora e Exportadora","15/05/26",-26,1497.0],["Descomplica Curso de Idiomas LTDA","30/05/26",-11,997.0],["Radexperts Educação Médica LTDA","28/06/26",18,1422.0],["Aprenda Aperfeiçoamento e Qualif.","03/07/26",23,1497.0],["Finanfast Securitizadora SA","03/07/26",23,1422.0],["Fábio Peres Sgobi (FPS Assessoria)","23/07/26",43,997.0],["Curso Revisão LTDA (Revisão PGE)","26/07/26",46,1497.0],["GEC Empreendimentos Cosméticos","14/08/26",65,1497.0],["Fin Capital Assessor de Investim.","10/09/26",92,1422.0],["H8 Educação Médica LTDA","09/10/26",121,0],["Centro de Ensino Método (FAMESP)","14/10/26",126,1397.0],["Lexis English Academy","05/01/27",209,0],["Zipin (Gustavo Amaral Particip.)","05/01/27",209,0],["Consultoria Ecommerceverso","05/01/27",209,0],["UFEM Educacional","05/01/27",209,0],["Projeto Denise de Carvalho","02/02/27",237,1297.0],["Projeto Vicente Guimarães","02/02/27",237,1297.0],["Bacha Serviços de Marketing","13/03/27",276,897.0]];
+const BLUE='#3B82F6',RED='#EF5A6F',GREEN='#2FB67C',PURPLE='#9B5DE5',AMBER='#E0A23C',DATAC='#7B7896',MUT='#9d99b2',GRID='rgba(255,255,255,.06)',LBL='#cfcce0';
+const $=id=>document.getElementById(id);
+const fmtMi=v=>{var a=Math.abs(v);return a>=1e6?'R$ '+(v/1e6).toFixed(2).replace('.',',')+' mi':(a>=1000?'R$ '+(v<0?'-':'')+Math.round(Math.abs(v)/1000).toLocaleString('pt-BR')+' mil':'R$ '+Math.round(v).toLocaleString('pt-BR'));};
+const fmtMil=v=>'R$ '+(v<0?'-':'')+Math.round(Math.abs(v)/1000).toLocaleString('pt-BR')+' mil';
+const fmtPct=v=>(v*100).toFixed(1).replace('.',',')+'%';
+const BRL=v=>'R$ '+(v<0?'-':'')+Math.round(Math.abs(v)).toLocaleString('pt-BR');
+const kLbl=v=>'R$'+(Math.round(v)).toLocaleString('pt-BR')+'k';
+Chart.defaults.font.family='Raleway'; Chart.defaults.color=MUT; Chart.defaults.font.size=12;
+function grad(ctx,c1,c2){var g=ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,c1);g.addColorStop(1,c2);return g;}
+// value labels plugin (bars + doughnut)
+function DL(fmt,o){o=o||{};return {id:'dl',afterDatasetsDraw(ch){var ctx=ch.ctx,horiz=ch.options.indexAxis==='y';ch.data.datasets.forEach(function(ds,di){var meta=ch.getDatasetMeta(di);if(meta.hidden)return;meta.data.forEach(function(el,i){var v=ds.data[i];if(v==null||v===0)return;ctx.save();ctx.font='800 10px Raleway';ctx.fillStyle=o.color||LBL;if(el.startAngle!==undefined){var a=(el.startAngle+el.endAngle)/2,rr=(el.innerRadius+el.outerRadius)/2;if(el.endAngle-el.startAngle<0.18)return;ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(fmt(v),el.x+Math.cos(a)*rr,el.y+Math.sin(a)*rr);}else if(horiz){ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(fmt(v),el.x+5,el.y);}else{ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(fmt(v),el.x,el.y-3);}ctx.restore();});});}};}
+var charts=[];
+function catM(c){return D.PAGM[c]||[0,0,0,0,0];}
+function sumA(a,i0,i1){var s=0;for(var i=i0;i<=i1;i++)s+=a[i]||0;return s;}
+const dedu_m=MN5.map((_,j)=>D.DEDU.reduce((s,c)=>s+catM(c)[j],0));
+const sm_m=MN5.map((_,j)=>D.SM.reduce((s,c)=>s+catM(c)[j],0));
+const infra_m=catM(D.INFRA),tec_m=catM(D.TEC),dist_m=catM(D.DIST),aquis_m=catM(D.AQUIS);
+const GA=Object.keys(D.PAGM).filter(c=>D.DEDU.indexOf(c)<0&&D.SM.indexOf(c)<0&&[D.INFRA,D.TEC,D.DIST,D.AQUIS].indexOf(c)<0);
+const ga_m=MN5.map((_,j)=>GA.reduce((s,c)=>s+catM(c)[j],0));
+const cogs_m=MN5.map((_,j)=>infra_m[j]+tec_m[j]);
+const op_m=MN5.map((_,j)=>D.rec_m[j]-dedu_m[j]-cogs_m[j]-sm_m[j]-ga_m[j]);
+const net_m=MN5.map((_,j)=>D.rec_m[j]-D.pag_m[j]);
+var SEL={i0:0,i1:4};
+function plabel(){return MN5[SEL.i0].toLowerCase()+(SEL.i0!==SEL.i1?'–'+MN5[SEL.i1].toLowerCase():'')+'/26';}
+function Rg(){var i0=SEL.i0,i1=SEL.i1,sl=a=>a.slice(i0,i1+1);
+ var rec=sumA(D.rec_m,i0,i1),pag=sumA(D.pag_m,i0,i1),infra=sumA(infra_m,i0,i1),tec=sumA(tec_m,i0,i1),dedu=sumA(dedu_m,i0,i1),sm=sumA(sm_m,i0,i1),ga=sumA(ga_m,i0,i1),dist=sumA(dist_m,i0,i1),aquis=sumA(aquis_m,i0,i1);
+ var cogs=infra+tec,naoop=dist+aquis,recLiq=rec-dedu,mb=recLiq-cogs,resOp=mb-sm-ga,resCx=resOp-naoop;
+ var tier=D.TIER_M.map(t=>sumA(t,i0,i1)),tierTot=tier.reduce((a,b)=>a+b,0);
+ return {i0,i1,n:i1-i0+1,rec,pag,infra,tec,dedu,sm,ga,dist,aquis,cogs,naoop,recLiq,mb,resOp,resCx,tier,tierTot,assinN:sumA(D.assin_n,i0,i1),lbls:MN5.slice(i0,i1+1),rec_m:sl(D.rec_m),pag_m:sl(D.pag_m),op_m:sl(op_m),net_m:sl(net_m)};}
+const KEY=[['Receita / entradas',BLUE],['Custo / saídas',RED],['Lucro / sobra',GREEN],['Distribuição / cota',PURPLE]];
+function render(){
+ var r=Rg();
+ $('keybar').innerHTML='<span style="color:var(--mut2);font-weight:800;text-transform:uppercase;font-size:10.5px;letter-spacing:.05em">Cores</span>'+KEY.map(k=>`<span class="k"><span class="kd" style="background:${k[1]}"></span>${k[0]}</span>`).join('');
+ // RESUMO
+ $('k_rec').textContent=fmtMi(r.rec); $('k_recs').textContent=r.assinN+' cobranças no período';
+ $('k_ro').textContent=fmtMi(r.resOp); $('k_ros').textContent='margem de '+(r.rec?fmtPct(r.resOp/r.rec):'—')+' — operação saudável';
+ $('k_cx').textContent=fmtMi(r.resCx); $('k_cxs').textContent='recebido − pago no período';
+ $('k_sd').textContent=fmtMi(D.caixa_atual);
+ $('alerts').innerHTML=[
+  ['ok','ti-circle-check','<b>A operação dá lucro:</b> margem operacional de '+(r.rec?fmtPct(r.resOp/r.rec):'—')+' ('+fmtMi(r.resOp)+' no período).'],
+  ['warn','ti-alert-triangle','<b>Infra é '+(r.rec?fmtPct(r.infra/r.rec):'—')+' da receita</b> ('+fmtMi(r.infra)+') — é o maior custo do negócio e cresce com a base. Acompanhar de perto.']
+ ].map(a=>`<div class="al ${a[0]}"><i class="ti ${a[1]}"></i><div>${a[2]}</div></div>`).join('');
+ var pnt=[['Lucro operacional',r.resOp,GREEN,''],['Distribuição de lucros',r.dist,PURPLE,'−'],['Compra da parte do sócio',r.aquis,'#c08bf0','−'],['Resultado de caixa',r.resCx,r.resCx>=0?GREEN:RED,'=']];
+ $('ponte').innerHTML=pnt.map((p,i)=>(p[3]?`<div style="display:flex;align-items:center;font-size:24px;font-weight:800;color:var(--mut2);padding:0 3px">${p[3]}</div>`:'')+`<div style="flex:1;min-width:148px;background:var(--card2);border-radius:12px;border-top:3px solid ${p[2]};padding:13px 16px"><div style="font-size:12px;color:var(--mut);font-weight:700">${p[0]}</div><div style="font-size:23px;font-weight:800;color:${p[2]};margin-top:3px">${fmtMi(p[1])}</div></div>`).join('');
+ var usos=[['Custos da operação',r.rec-r.resOp,DATAC],['Distribuição de lucros',r.dist,PURPLE],['Compra da parte do sócio',r.aquis,'#c08bf0'],['Sobra de caixa',r.resCx,r.resCx>=0?GREEN:RED]];
+ var base=usos.slice(0,3),tot=base.reduce((s,u)=>s+u[1],0)||1;
+ $('compbar').innerHTML=base.map(u=>{var pc=u[1]/tot*100;return `<div title="${u[0]}: ${BRL(u[1])}" style="width:${pc}%;background:${u[2]}">${pc>=10?Math.round(pc)+'%':''}</div>`;}).join('');
+ $('compleg').innerHTML=usos.map(u=>`<div class="it"><span class="sw" style="background:${u[2]}"></span><div><div style="font-size:13px;font-weight:700">${u[0]}</div><div style="font-size:12px;color:var(--mut);font-weight:600">${BRL(u[1])}</div></div></div>`).join('');
+ // DRE
+ $('dre_cap').textContent='regime de caixa · Conta Azul · período '+plabel();
+ var rows=[['h','Receita bruta recebida',r.rec,''],['sub','(−) Deduções (taxas, DAS, devoluções)',-r.dedu,'neg'],['tot','= Receita líquida',r.recLiq,''],['sub','(−) Infraestrutura',-r.infra,'neg'],['sub','(−) Time de tecnologia',-r.tec,'neg'],['tot','= Margem bruta',r.mb,'pos'],['sub','(−) Marketing e parceiros',-r.sm,'neg'],['sub','(−) Adm, softwares, outras',-r.ga,'neg'],['tot','= Lucro operacional',r.resOp,'pos'],['sub','(−) Distribuição de lucros',-r.dist,'neg'],['sub','(−) Compra da parte do sócio (até jun/26)',-r.aquis,'neg'],['tot','= Resultado de caixa',r.resCx,r.resCx>=0?'pos':'neg']];
+ $('dre_tbl').innerHTML=rows.map(x=>`<tr class="${x[0]}"><td>${x[1]}</td><td class="${x[3]}">${BRL(x[2])}${(x[1].indexOf('Margem bruta')>-1||x[1].indexOf('operacional')>-1)&&r.rec?' · '+fmtPct(x[2]/r.rec):''}</td></tr>`).join('');
+ // CAIXA
+ $('cx_now').textContent=fmtMi(D.caixa_atual); $('cx_rec').textContent=fmtMi(r.rec); $('cx_pag').textContent=fmtMi(r.pag);
+ $('cx_inad').textContent=fmtMi(COB.inad_total); $('cx_inads').textContent=COB.inad_n+' clientes em atraso';
+ buildCharts(r);
+}
+function baseBar(extra){return Object.assign({responsive:true,maintainAspectRatio:false,layout:{padding:{top:18}},plugins:{legend:{display:true,position:'top',labels:{boxWidth:13,boxHeight:13,font:{size:12,weight:'700'},padding:14,usePointStyle:true,pointStyle:'rectRounded'}},tooltip:{callbacks:{}}}},extra||{});}
+function buildCharts(r){
+ charts.forEach(c=>c.destroy());charts.length=0;
+ charts.push(new Chart($('r_mes'),{type:'bar',data:{labels:r.lbls,datasets:[{label:'Receita',data:r.rec_m.map(v=>v/1000),backgroundColor:BLUE,borderRadius:5,maxBarThickness:46},{label:'Lucro operacional',data:r.op_m.map(v=>v/1000),backgroundColor:c=>c.raw>=0?GREEN:RED,borderRadius:5,maxBarThickness:46}]},options:baseBar({plugins:{legend:{display:true,position:'top',labels:{boxWidth:13,font:{size:12,weight:'700'},padding:14,usePointStyle:true,pointStyle:'rectRounded'}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+BRL(c.parsed.y*1000)}}},scales:{x:{grid:{display:false},ticks:{font:{weight:'700'}}},y:{grid:{color:GRID},ticks:{callback:v=>'R$'+v+'k'}}}}),plugins:[DL(kLbl)]}));
+ var dc=Object.keys(D.PAGM).map(c=>[c,sumA(catM(c),r.i0,r.i1)]).filter(d=>d[1]>0).sort((a,b)=>b[1]-a[1]);
+ charts.push(new Chart($('cu_cat'),{type:'bar',data:{labels:dc.map(d=>d[0]),datasets:[{label:'Saída no período',data:dc.map(d=>d[1]/1000),backgroundColor:dc.map(d=>/Distribuição|Aquisição/.test(d[0])?PURPLE:(/infra/.test(d[0])?RED:DATAC)),borderRadius:4,maxBarThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:42}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>BRL(c.parsed.x*1000)}}},scales:{x:{grid:{color:GRID},ticks:{callback:v=>'R$'+v+'k'}},y:{grid:{display:false},ticks:{font:{size:11,weight:'600'}}}}},plugins:[DL(kLbl)]}));
+ charts.push(new Chart($('cx_bank'),{type:'bar',data:{labels:r.lbls,datasets:[{label:'Recebido',data:r.rec_m.map(v=>v/1000),backgroundColor:GREEN,borderRadius:5,maxBarThickness:40},{label:'Pago',data:r.pag_m.map(v=>v/1000),backgroundColor:RED,borderRadius:5,maxBarThickness:40}]},options:baseBar({plugins:{legend:{display:true,position:'top',labels:{boxWidth:13,font:{size:12,weight:'700'},padding:14,usePointStyle:true,pointStyle:'rectRounded'}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+BRL(c.parsed.y*1000)}}},scales:{x:{grid:{display:false},ticks:{font:{weight:'700'}}},y:{grid:{color:GRID},ticks:{callback:v=>'R$'+v+'k'}}}}),plugins:[DL(kLbl)]}));
+ charts.push(new Chart($('cx_net'),{type:'bar',data:{labels:r.lbls,datasets:[{label:'Sobra de caixa',data:r.net_m.map(v=>v/1000),backgroundColor:c=>c.raw>=0?GREEN:RED,borderRadius:5,maxBarThickness:46}]},options:baseBar({plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>BRL(c.parsed.y*1000)}}},scales:{x:{grid:{display:false},ticks:{font:{weight:'700'}}},y:{grid:{color:GRID},ticks:{callback:v=>'R$'+v+'k'}}}}),plugins:[DL(kLbl)]}));
+ var tipoCats=['Mensalidade','Contatos excedentes','Canais adicionais','Usuários adicionais','Agentes de IA','Setup','Outros'];
+ var tipoCol=[BLUE,AMBER,PURPLE,'#6aa0e0',GREEN,DATAC,'#5b5b78'];
+ var tipoVal=tipoCats.map(c=>sumA(D.TIPO_M[c],r.i0,r.i1)), tipoTot=tipoVal.reduce((a,b)=>a+b,0)||1;
+ charts.push(new Chart($('rv_tier'),{type:'doughnut',data:{labels:tipoCats,datasets:[{data:tipoVal,backgroundColor:tipoCol,borderColor:'#1c1a28',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{font:{size:11.5,weight:'600'},boxWidth:12,padding:8,usePointStyle:true,pointStyle:'rectRounded',generateLabels:ch=>ch.data.labels.map((l,i)=>({text:l+'  '+Math.round(tipoVal[i]/tipoTot*100)+'%',fillStyle:tipoCol[i],strokeStyle:tipoCol[i],index:i}))}},tooltip:{callbacks:{label:c=>c.label+': '+BRL(c.parsed)+' ('+fmtPct(c.parsed/tipoTot)+')'}}}},plugins:[DL(v=>v>=3000?'R$'+Math.round(v/1000)+'k':'')]}));
+}
+function fillStatic(){
+ // FOLHA
+ var folhaProj=(FOLHA_M[5]-13200)/1000;
+ new Chart($('eq_mes'),{type:'bar',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul*'],datasets:[{label:'Folha do mês',data:FOLHA_M.map(v=>v/1000).concat([folhaProj]),backgroundColor:c=>c.dataIndex===6?'rgba(224,162,60,.5)':grad(c.chart.ctx,'#5b8bff','#9B5DE5'),borderColor:c=>c.dataIndex===6?AMBER:'transparent',borderWidth:c=>c.dataIndex===6?1.5:0,borderRadius:5,maxBarThickness:42}]},options:baseBar({layout:{padding:{top:18}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataIndex===6?'Projeção julho (sem Valdomiro): '+BRL(c.parsed.y*1000):BRL(c.parsed.y*1000)}}},scales:{x:{grid:{display:false},ticks:{font:{weight:'700'}}},y:{grid:{color:GRID},ticks:{callback:v=>'R$'+v+'k'}}}}),plugins:[DL(kLbl)]});
+ $('eq_tbl').innerHTML=FOLHA.map(p=>`<tr><td style="font-weight:600">${p[0]}</td>${p[1].map(v=>`<td style="text-align:right;color:${v==null?'var(--mut2)':'inherit'}">${v==null?'—':BRL(v)}</td>`).join('')}</tr>`).join('');
+ // INADIMPLÊNCIA
+ $('inad_sum').textContent='total R$ '+(COB.inad_total/1000).toFixed(1).replace('.',',')+' mil vencidos em '+COB.inad_n+' clientes';
+ $('inad_tbl').innerHTML=COB.inad_list.map(c=>`<tr><td style="font-weight:600">${c[0]}</td><td style="text-align:right;font-weight:700;color:var(--red)">${BRL(c[1])}</td><td style="text-align:right;color:var(--mut)">${c[2]?BRL(c[2]):'—'}</td></tr>`).join('');
+ // CONTRATOS
+ $('cb_mrr').textContent=fmtMi(COB.mrr_ativos); $('cb_mrrs').textContent='ARR ~R$ 1,26 mi';
+ $('cb_ativos').textContent=COB.n_ativos; $('cb_ativoss').textContent=COB.mensal_ativos+' mensal · '+COB.anual_ativos+' anual · '+COB.poc_ativos+' POC';
+ $('cb_churn').textContent=fmtPct(COB.churn_pct); $('cb_churns').textContent=COB.n_distrato+' distratos no total';
+ var mlab=COB.dist_labels.map(s=>{var p=s.split('-');return ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][+p[1]-1]+'/'+p[0].slice(2);});
+ new Chart($('cb_flow'),{type:'bar',data:{labels:mlab,datasets:[{label:'Novos contratos',data:COB.new_counts,backgroundColor:GREEN,borderRadius:4,maxBarThickness:26},{label:'Distratos',data:COB.dist_counts.map(v=>-v),backgroundColor:RED,borderRadius:4,maxBarThickness:26}]},options:baseBar({plugins:{legend:{display:true,position:'top',labels:{boxWidth:13,font:{size:12,weight:'700'},padding:14,usePointStyle:true,pointStyle:'rectRounded'}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.abs(c.parsed.y)+' contratos'}}},scales:{x:{grid:{display:false},ticks:{font:{size:11,weight:'700'}}},y:{grid:{color:GRID},ticks:{callback:v=>Math.abs(v)}}}}),plugins:[DL(v=>''+Math.abs(Math.round(v)))]});
+ new Chart($('cb_mix'),{type:'doughnut',data:{labels:['Mensal','Anual','POC / Trial'],datasets:[{data:[COB.mensal_ativos,COB.anual_ativos,COB.poc_ativos],backgroundColor:[BLUE,PURPLE,DATAC],borderColor:'#1c1a28',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{font:{size:12,weight:'600'},boxWidth:12,padding:11,usePointStyle:true,pointStyle:'rectRounded'}},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed+' contratos'}}}},plugins:[DL(v=>''+v)]});
+ $('cl_tbl').innerHTML=D.top_clientes.map(c=>`<tr><td style="font-weight:600">${c[0]}</td><td style="text-align:right;font-weight:700">${BRL(c[1])}</td><td style="text-align:right;color:var(--mut)">${fmtPct(c[1]/D.rec_tot_full)}</td></tr>`).join('');
+}
+const TITLES={resumo:['Resumo CEO','visão executiva — o que entra, o que sobra e para onde vai'],dre:['DRE · Custos · Folha','lucro, estrutura de custo e evolução do time'],caixa:['Caixa & Cobrança','fluxo de caixa, trava do cartão e inadimplência'],contratos:['Contratos & Clientes','MRR, entradas e saídas da base, e de onde vem a receita']};
+document.querySelectorAll('.navi button').forEach(t=>t.onclick=()=>{document.querySelectorAll('.navi button').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));t.classList.add('active');$(t.dataset.v).classList.add('active');$('ttl').textContent=TITLES[t.dataset.v][0];$('sub1').textContent=TITLES[t.dataset.v][1];});
+(function(){var de=$('f_de'),ate=$('f_ate');MN5.forEach((m,i)=>{de.innerHTML+=`<option value="${i}">${m}</option>`;ate.innerHTML+=`<option value="${i}">${m}</option>`;});de.value=0;ate.value=4;
+ de.onchange=ate.onchange=()=>{SEL.i0=+de.value;SEL.i1=+ate.value;if(SEL.i0>SEL.i1){var t=SEL.i0;SEL.i0=SEL.i1;SEL.i1=t;de.value=SEL.i0;ate.value=SEL.i1;}render();};
+ $('f_reset').onclick=()=>{SEL={i0:0,i1:4};de.value=0;ate.value=4;render();};})();
+render(); fillStatic();
+</script>
+</body>
+</html>
