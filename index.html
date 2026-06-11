@@ -365,9 +365,9 @@ buildPeriod(); render(); fillStatic();
  function stat(txt,ok){var f=document.querySelector('.side .foot');if(!f)return;var s=document.getElementById('livestat');if(!s){s=document.createElement('div');s.id='livestat';s.style.marginTop='7px';f.appendChild(s);}s.innerHTML='<span style="color:'+(ok?'#2FB67C':'#9d99b2')+';font-size:13px">●</span> '+txt;}
  stat('conectando à planilha…',false);
  Promise.all(GIDS.map(g=>fetch(BASE+g).then(r=>r.ok?r.text():'').catch(()=>''))).then(function(texts){
-  var res={};texts.forEach(function(t){if(!t||t.indexOf('<')===0)return;try{var rows=pCSV(t),k=detect(rows);if(k&&H[k]&&H[k](rows))res[k]=1;}catch(e){}});
-  if(res.mensal){try{paintAll();stat('dados ao vivo ✓ ('+Object.keys(res).length+'/5 abas) · '+new Date().toLocaleDateString('pt-BR'),true);}catch(e){stat('usando dados salvos',false);}}
-  else stat('usando dados salvos (planilha indisponível)',false);
+  var res={},dbg=[];texts.forEach(function(t,i){if(!t){dbg.push(i+':vazio');return;}if(t.indexOf('<')===0){dbg.push(i+':html');return;}try{var rows=pCSV(t),k=detect(rows);if(k&&H[k]&&H[k](rows)){res[k]=1;dbg.push(i+':'+k);}else dbg.push(i+':'+(k||'?')+'-x');}catch(e){dbg.push(i+':ERR '+e.message);}});
+  if(res.mensal){try{paintAll();stat('dados ao vivo ✓ ('+Object.keys(res).length+'/5 abas) · '+new Date().toLocaleDateString('pt-BR'),true);}catch(e){stat('paintERR: '+e.message,false);}}
+  else stat('diag: '+dbg.join(' | '),false);
  }).catch(function(){stat('usando dados salvos (sem conexão)',false);});
 })();
 </script>
