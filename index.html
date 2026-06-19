@@ -110,6 +110,7 @@ main{flex:1;min-width:0;}
 <div class="navgrp">Operacional</div>
 <button data-v="caixa"><i class="ti ti-wave-square"></i><span>Caixa &amp; Cobrança</span></button>
 <button data-v="contratos"><i class="ti ti-file-invoice"></i><span>Contratos &amp; Clientes</span></button>
+<button data-v="equipe"><i class="ti ti-users"></i><span>Equipe</span></button>
 </div>
 <div class="foot"><b>Front CRM</b> · Grupo Vendas Pro<br>Fonte: Conta Azul · ASAAS · contratos<br><span style="color:var(--mut2)">dados exatos · jan–mai/2026</span></div>
 </aside>
@@ -183,6 +184,22 @@ main{flex:1;min-width:0;}
 </div>
 </section>
 
+<!-- ===== EQUIPE ===== -->
+<section class="view" id="equipe">
+<div class="kpis">
+<div class="kpi b-red"><div class="lbl">Folha no período</div><div class="val" id="eq_k_tot">—</div><div class="sub">equipe + prestadores</div></div>
+<div class="kpi b-blue"><div class="lbl">Pessoas pagas</div><div class="val" id="eq_k_n">—</div><div class="sub">no período</div></div>
+<div class="kpi b-amber"><div class="lbl">Maior custo</div><div class="val" id="eq_k_top">—</div><div class="sub" id="eq_k_tops"></div></div>
+<div class="kpi b-purple"><div class="lbl">Maior área</div><div class="val" id="eq_k_area">—</div><div class="sub" id="eq_k_areas"></div></div>
+</div>
+<div class="grid2">
+<div class="panel"><h3>Gasto por pessoa</h3><div class="cap">quanto cada pessoa custou no período · cor = área</div><div class="chartbox" style="height:520px"><canvas id="eq_pessoa"></canvas></div></div>
+<div class="panel"><h3>Gasto por área</h3><div class="cap">como a folha se distribui entre os times</div><div class="chartbox" style="height:520px"><canvas id="eq_area"></canvas></div></div>
+</div>
+<div class="panel"><h3>Detalhe por pessoa</h3><div class="cap">fonte: aba FOLHA · folha 100% fixa (sem variável) · período <b id="eq_per"></b></div>
+<table class="etab"><thead><tr><th>Pessoa</th><th>Área</th><th>Papel</th><th style="text-align:right">No período</th><th style="text-align:right">% folha</th></tr></thead><tbody id="eq_detail"></tbody></table></div>
+</section>
+
 </div>
 </main>
 </div>
@@ -212,6 +229,19 @@ const COB={mrr_ativos:95976,mrr_mensal:63281,mrr_anual:32695,n_ativos:121,mensal
 var FMN=['Jan','Fev','Mar','Abr','Mai','Jun'];
 var FOLHA_M=[24206.70,26948.63,29206.70,29631.85,34757.00,40757.00];
 var FOLHA=[["Valdomiro (CTO — saiu jun)",[null,null,null,0,13200,13200]],["Gustavo (CTO)",[null,null,null,null,null,6000]],["Paula",[6500,6500,6500,6500,6500,6500]],["Brenno (Coord. MKT)",[5000,5000,5000,5000,5000,5000]],["Jader",[5000,5000,5000,12500,5000,5000]],["Leonardo (Tráfego)",[2500,2500,2500,2500,2500,2500]],["Rodrigo (Sales Ops)",[null,2741.93,5000,null,null,null]],["Flávio (CS)",[2500,2500,2500,2500,null,null]],["Rafael (Designer)",[2000,2000,2000,null,null,null]],["Thaís",[null,null,null,null,2000,2000]],["Ana Rosa",[557,557,557,557,557,557]],["Eduardo (Parceiro)",[74.85,74.85,74.85,74.85,null,null]],["Caíque (Parceiro)",[74.85,74.85,74.85,null,null,null]]];
+var FOLHA_META={'Jader':{area:'CS',papel:'Customer Success'},'Paula':{area:'Operações',papel:'Operações'}};
+function areaOf(n){n=(''+n).toLowerCase();
+ if(/cto|tecnolog|\bdev\b|jobspro/.test(n))return 'Tecnologia';
+ if(/mkt|marketing|tráfego|trafego|designer|copy|edição|edicao|vídeo|video/.test(n))return 'Marketing';
+ if(/\bcs\b|customer|success/.test(n))return 'CS';
+ if(/sales ops|closer|\bsdr\b|comercial|social seller/.test(n))return 'Comercial';
+ if(/parceiro/.test(n))return 'Parceiros';
+ if(/thaís|thais|operaç|operac|assistente/.test(n))return 'Operações';
+ if(/ana rosa|\badm\b|administrat|financ/.test(n))return 'Adm';
+ return 'Outros';}
+var ACOL={Marketing:'#9B5DE5',Comercial:'#6C8AE4',CS:'#3B82F6','Operações':'#2FB67C',Tecnologia:'#7B7896',Adm:'#E0A23C',Parceiros:'#EF8FB3','Outros':'#5b5b78'};
+function colArea(a){return ACOL[a]||'#5b5b78';}
+function metaOf(nome){var m=FOLHA_META[nome];return {area:(m&&m.area)||areaOf(nome),papel:(m&&m.papel)||''};}
 const RENOV=[["Assaad Treinamentos LTDA","14/05/25",-392,1247.5],["Transformar Desenvolvimento Emocional","29/05/25",-377,1247.5],["Panthers Treinamento em Desenvolv.","08/07/25",-337,1497.0],["Danilo Oliveira Advogados","26/08/25",-288,497.0],["Záfira Atacado LTDA","09/09/25",-274,1497.0],["Comunicadores Magnéticos LTDA","12/09/25",-271,1422.0],["The Invisible Company LTDA","14/10/25",-239,1497.0],["Inspiração Treinamentos LTDA","15/10/25",-238,1497.0],["LSMC Cursos e Treinamentos S.A.","24/10/25",-229,1497.0],["Veda Saúde LTDA","02/11/25",-220,1288.0],["Vinicius F. Rodrigues de Oliveira","11/11/25",-211,1497.0],["SCS Digital LTDA","14/12/25",-178,1497.0],["Agência Shoot Treinamento","28/02/26",-102,1297.0],["Xo Rugas","12/03/26",-90,1497.0],["Rocha Cursos e Treinamentos (Sex. Sem Segr.)","10/05/26",-31,1497.0],["Tradecorp Importadora e Exportadora","15/05/26",-26,1497.0],["Descomplica Curso de Idiomas LTDA","30/05/26",-11,997.0],["Radexperts Educação Médica LTDA","28/06/26",18,1422.0],["Aprenda Aperfeiçoamento e Qualif.","03/07/26",23,1497.0],["Finanfast Securitizadora SA","03/07/26",23,1422.0],["Fábio Peres Sgobi (FPS Assessoria)","23/07/26",43,997.0],["Curso Revisão LTDA (Revisão PGE)","26/07/26",46,1497.0],["GEC Empreendimentos Cosméticos","14/08/26",65,1497.0],["Fin Capital Assessor de Investim.","10/09/26",92,1422.0],["H8 Educação Médica LTDA","09/10/26",121,0],["Centro de Ensino Método (FAMESP)","14/10/26",126,1397.0],["Lexis English Academy","05/01/27",209,0],["Zipin (Gustavo Amaral Particip.)","05/01/27",209,0],["Consultoria Ecommerceverso","05/01/27",209,0],["UFEM Educacional","05/01/27",209,0],["Projeto Denise de Carvalho","02/02/27",237,1297.0],["Projeto Vicente Guimarães","02/02/27",237,1297.0],["Bacha Serviços de Marketing","13/03/27",276,897.0]];
 const BLUE='#3B82F6',RED='#EF5A6F',GREEN='#2FB67C',PURPLE='#9B5DE5',AMBER='#E0A23C',DATAC='#7B7896',MUT='#9d99b2',GRID='rgba(255,255,255,.06)',LBL='#cfcce0';
 const $=id=>document.getElementById(id);
@@ -274,7 +304,7 @@ function render(){
  // CAIXA
  $('cx_now').textContent=fmtMi(D.caixa_atual); $('cx_rec').textContent=fmtMi(r.rec); $('cx_pag').textContent=fmtMi(r.pag);
  $('cx_inad').textContent=fmtMi(COB.inad_total); $('cx_inads').textContent=COB.inad_n+' clientes em atraso';
- buildCharts(r);
+ buildCharts(r);buildEquipe(r);
 }
 function baseBar(extra){return Object.assign({responsive:true,maintainAspectRatio:false,layout:{padding:{top:18}},plugins:{legend:{display:true,position:'top',labels:{boxWidth:13,boxHeight:13,font:{size:12,weight:'700'},padding:14,usePointStyle:true,pointStyle:'rectRounded'}},tooltip:{callbacks:{}}}},extra||{});}
 function buildCharts(r){
@@ -291,6 +321,24 @@ function buildCharts(r){
  var tipoCol=[BLUE,AMBER,PURPLE,'#6aa0e0',GREEN,DATAC,'#5b5b78'];
  var tipoVal=tipoCats.map(c=>sumA(D.TIPO_M[c],r.i0,r.i1)), tipoTot=tipoVal.reduce((a,b)=>a+b,0)||1;
  charts.push(new Chart($('rv_tier'),{type:'doughnut',data:{labels:tipoCats,datasets:[{data:tipoVal,backgroundColor:tipoCol,borderColor:'#1c1a28',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{font:{size:11.5,weight:'600'},boxWidth:12,padding:8,usePointStyle:true,pointStyle:'rectRounded',generateLabels:ch=>ch.data.labels.map((l,i)=>({text:l+'  '+Math.round(tipoVal[i]/tipoTot*100)+'%',fillStyle:tipoCol[i],strokeStyle:tipoCol[i],index:i}))}},tooltip:{callbacks:{label:c=>c.label+': '+BRL(c.parsed)+' ('+fmtPct(c.parsed/tipoTot)+')'}}}},plugins:[DL(v=>v>=3000?'R$'+Math.round(v/1000)+'k':'')]}));
+}
+function buildEquipe(r){
+ var sel=new Set(MN5.slice(r.i0,r.i1+1).map(m=>(''+m).toLowerCase().slice(0,3)));
+ var mi=[];FMN.forEach(function(m,k){if(sel.has((''+m).toLowerCase().slice(0,3)))mi.push(k);});
+ if(!mi.length)mi=FMN.map((m,k)=>k);
+ var per=FOLHA.map(function(p){var s=0;mi.forEach(k=>s+=(p[1][k]||0));var mt=metaOf(p[0]);return {nome:p[0],val:s,area:mt.area,papel:mt.papel};}).filter(x=>x.val>0).sort((a,b)=>b.val-a.val);
+ var tot=per.reduce((s,x)=>s+x.val,0)||1;
+ $('eq_k_tot').textContent=fmtMi(tot);
+ $('eq_k_n').textContent=per.length;
+ if(per.length){$('eq_k_top').textContent=(''+per[0].nome).split(/[ (]/)[0];$('eq_k_tops').textContent=BRL(per[0].val)+' · '+fmtPct(per[0].val/tot);}
+ var ag={};per.forEach(x=>ag[x.area]=(ag[x.area]||0)+x.val);
+ var areas=Object.keys(ag).sort((a,b)=>ag[b]-ag[a]);
+ if(areas.length){$('eq_k_area').textContent=areas[0];$('eq_k_areas').textContent=BRL(ag[areas[0]])+' · '+fmtPct(ag[areas[0]]/tot);}
+ if($('eq_per'))$('eq_per').textContent=plabel();
+ ['eq_pessoa','eq_area'].forEach(function(id){var ex=Chart.getChart(id);if(ex)ex.destroy();});
+ charts.push(new Chart($('eq_pessoa'),{type:'bar',data:{labels:per.map(x=>x.nome),datasets:[{label:'Folha no período',data:per.map(x=>x.val),backgroundColor:per.map(x=>colArea(x.area)),borderRadius:4,maxBarThickness:20}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:58}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>per[c.dataIndex].area+': '+BRL(c.parsed.x)}}},scales:{x:{grid:{color:GRID},ticks:{callback:v=>'R$'+Math.round(v/1000)+'k'}},y:{grid:{display:false},ticks:{font:{size:10.5,weight:'600'}}}}},plugins:[DL(v=>'R$'+(v/1000).toFixed(1).replace('.',',')+'k')]}));
+ charts.push(new Chart($('eq_area'),{type:'doughnut',data:{labels:areas,datasets:[{data:areas.map(a=>ag[a]),backgroundColor:areas.map(colArea),borderColor:'#1c1a28',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{font:{size:11.5,weight:'600'},boxWidth:12,padding:8,usePointStyle:true,pointStyle:'rectRounded',generateLabels:ch=>ch.data.labels.map((l,i)=>({text:l+'  '+Math.round(ag[areas[i]]/tot*100)+'%',fillStyle:colArea(l),strokeStyle:colArea(l),index:i}))}},tooltip:{callbacks:{label:c=>c.label+': '+BRL(c.parsed)+' ('+fmtPct(c.parsed/tot)+')'}}}},plugins:[DL(v=>v>=2000?'R$'+Math.round(v/1000)+'k':'')]}));
+ $('eq_detail').innerHTML=per.map(x=>`<tr><td style="font-weight:600">${x.nome}</td><td><span style="background:${colArea(x.area)}22;color:${colArea(x.area)};padding:2px 9px;border-radius:6px;font-size:11px;font-weight:700">${x.area}</span></td><td style="color:var(--mut)">${x.papel||'—'}</td><td style="text-align:right;font-weight:700">${BRL(x.val)}</td><td style="text-align:right;color:var(--mut)">${fmtPct(x.val/tot)}</td></tr>`).join('');
 }
 function fillStatic(){
  // FOLHA
@@ -312,7 +360,7 @@ function fillStatic(){
  new Chart($('cb_mix'),{type:'doughnut',data:{labels:['Mensal','Anual','POC / Trial'],datasets:[{data:[COB.mensal_ativos,COB.anual_ativos,COB.poc_ativos],backgroundColor:[BLUE,PURPLE,DATAC],borderColor:'#1c1a28',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{font:{size:12,weight:'600'},boxWidth:12,padding:11,usePointStyle:true,pointStyle:'rectRounded'}},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed+' contratos'}}}},plugins:[DL(v=>''+v)]});
  $('cl_tbl').innerHTML=D.top_clientes.map(c=>`<tr><td style="font-weight:600">${c[0]}</td><td style="text-align:right;font-weight:700">${BRL(c[1])}</td><td style="text-align:right;color:var(--mut)">${fmtPct(c[1]/D.rec_tot_full)}</td></tr>`).join('');
 }
-const TITLES={resumo:['Resumo CEO','visão executiva — o que entra, o que sobra e para onde vai'],dre:['DRE · Custos · Folha','lucro, estrutura de custo e evolução do time'],caixa:['Caixa & Cobrança','fluxo de caixa, trava do cartão e inadimplência'],contratos:['Contratos & Clientes','MRR, entradas e saídas da base, e de onde vem a receita']};
+const TITLES={resumo:['Resumo CEO','visão executiva — o que entra, o que sobra e para onde vai'],dre:['DRE · Custos · Folha','lucro, estrutura de custo e evolução do time'],caixa:['Caixa & Cobrança','fluxo de caixa, trava do cartão e inadimplência'],contratos:['Contratos & Clientes','MRR, entradas e saídas da base, e de onde vem a receita'],equipe:['Equipe','gasto por pessoa e por área — folha do período']};
 document.querySelectorAll('.navi button').forEach(t=>t.onclick=()=>{document.querySelectorAll('.navi button').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));t.classList.add('active');$(t.dataset.v).classList.add('active');$('ttl').textContent=TITLES[t.dataset.v][0];$('sub1').textContent=TITLES[t.dataset.v][1];});
 function buildPeriod(){var de=$('f_de'),ate=$('f_ate');de.innerHTML='';ate.innerHTML='';MN5.forEach((m,i)=>{de.innerHTML+=`<option value="${i}">${m}</option>`;ate.innerHTML+=`<option value="${i}">${m}</option>`;});de.value=SEL.i0;ate.value=SEL.i1;
  de.onchange=ate.onchange=()=>{SEL.i0=+de.value;SEL.i1=+ate.value;if(SEL.i0>SEL.i1){var t=SEL.i0;SEL.i0=SEL.i1;SEL.i1=t;de.value=SEL.i0;ate.value=SEL.i1;}render();};
@@ -345,8 +393,11 @@ buildPeriod(); render(); fillStatic();
   D.partial_idx=-1;D.partial_txt='';d.forEach(function(r,j){var s=(''+r[0]).toLowerCase();if(s.indexOf('parcial')>-1){D.partial_idx=j;var m=(''+r[0]).match(/\(([^)]*)\)/);D.partial_txt=m?m[1]:'parcial';}});
   return D.rec_m[0]>0;};
  H.folha=function(rows){var h=rows[0],d=rows.slice(1).filter(r=>r[0]&&r[0].trim());if(!d.length)return false;
-  var mc=[];for(var i=1;i<h.length;i++)if((''+(h[i]||'')).trim())mc.push(i);
+  var ai=col(h,'área');if(ai<0)ai=col(h,'area');var pi=col(h,'papel');
+  var MM=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  var mc=[];for(var i=1;i<h.length;i++){if(i===ai||i===pi)continue;var hl=(''+(h[i]||'')).toLowerCase().trim();if(hl&&MM.some(m=>hl.indexOf(m)>-1))mc.push(i);}
   FMN=mc.map(i=>mlbl(h[i]));FOLHA=d.map(r=>[(''+r[0]).trim(),mc.map(i=>{var s=(''+(r[i]||'')).trim();return (s===''||s==='—')?null:nb(s);})]);
+  if(ai>=0||pi>=0){d.forEach(function(r){var nm=(''+r[0]).trim();FOLHA_META[nm]={area:ai>=0?((''+(r[ai]||'')).trim()||areaOf(nm)):metaOf(nm).area,papel:pi>=0?(''+(r[pi]||'')).trim():metaOf(nm).papel};});}
   FOLHA_M=mc.map((c,k)=>FOLHA.reduce((s,p)=>s+(p[1][k]||0),0));return FOLHA_M.length>0;};
  H.contratos=function(rows){var kv={};rows.forEach(r=>{if(r[0]&&r[1]!=null&&(''+r[1])!=='')kv[(''+r[0]).toLowerCase().trim()]=r[1];});
   var gv=(sub)=>{for(var k in kv)if(k.indexOf(sub)>-1)return nb(kv[k]);return null;};
